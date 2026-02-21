@@ -1,7 +1,11 @@
 import React from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import styles from "./event.module.css";
 
-function Event({ start, end, index, date, title, description, timelineStart, timelineEnd, extra_styles, size }) {
+function Event({ eventID, start, end, index, date, title, description, timelineStart, timelineEnd, extra_styles, size }) {
+  const router = useRouter();
+
   let totalYears = timelineEnd - timelineStart;
   let leftPosition = ((start - timelineStart) / totalYears) * 100;
   let width = ((end - start) / totalYears) * 100;
@@ -16,13 +20,15 @@ function Event({ start, end, index, date, title, description, timelineStart, tim
 
 
   return (
-    <div className={`${styles.event} ${classSize}`} style={{ ...extra_styles, left: `${leftPosition}%`, width: `${width}%`, top: `${topPosition}rem` }}>
-      <h3 className={styles.title}>{title}</h3>
-      <div className={styles.content}>
-        <span className={styles.date}>{date}</span>
-        <p>{description}</p>
+    <Link href={`/${eventID}/${title.replace(/\s+/g, '-').toLowerCase()}`}>
+      <div className={`${styles.event} ${classSize}`} style={{ ...extra_styles, left: `${leftPosition}%`, width: `${width}%`, top: `${topPosition}rem` }}>
+        <h3 className={styles.title}>{title}</h3>
+        <div className={styles.content}>
+          <span className={styles.date}>{date}</span>
+          <p>{description}</p>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

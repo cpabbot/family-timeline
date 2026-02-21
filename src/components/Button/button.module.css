@@ -1,0 +1,21 @@
+.btn {
+    outline: none;
+    border: none;
+    cursor: pointer;
+    /* background-color: #b58a15; */
+    color: var(--text-inverted);
+    border-radius: 5px;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    
+    background-color: #fff;
+    border: 2px solid #b58a15;
+    color: #b58a15;
+    font-weight: bold;
+}
+
+.btn:hover {
+    background-color: #c91;
+    color: #fff;
+    background-color: #b58a15;
+}

@@ -1,33 +1,35 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { useRouter } from 'next/navigation';
 import styles from "./timeline.module.css";
 import Event from "./Event";
 import eventService from "../services/event";
 
 function assignEventIndices(events) {
   // Sort by start time for consistency
-  const sorted = [...events].sort((a, b) => a.start - b.start);
+  const sorted = [...events].sort((a, b) => a.eventDate.getStartPosition() - b.eventDate.getStartPosition());
   const rows = [];
   sorted.forEach(event => {
     let assigned = false;
     for (let i = 0; i < rows.length; i++) {
-      if (event.start >= rows[i]) {
+      if (event.eventDate.getStartPosition() >= rows[i]) {
         event.index = i;
-        rows[i] = event.end;
+        rows[i] = event.eventDate.getEndPosition();
         assigned = true;
         break;
       }
     }
     if (!assigned) {
       event.index = rows.length;
-      rows.push(event.end);
+      rows.push(event.eventDate.getEndPosition());
     }
   });
   return sorted;
 }
 
 function Timeline() {
+  const router = useRouter();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,6 +43,7 @@ function Timeline() {
       try {
         const fetchedEvents = await eventService.getEvents();
         setEvents(fetchedEvents);
+        console.log("Fetched events:", fetchedEvents);
       } catch (error) {
         console.error("Failed to load events:", error);
       } finally {
@@ -52,11 +55,11 @@ function Timeline() {
 
   // Total timeline range (never changes - based on all events)
   const timelineStart = useMemo(() =>
-    eventsWithIndices.length > 0 ? eventsWithIndices[0].start : 0,
+    eventsWithIndices.length > 0 ? Math.min(eventsWithIndices[0].eventDate.getStartPosition() - 5, 1970.00) : 0,
     [eventsWithIndices]
   );
   const timelineEnd = useMemo(() =>
-    eventsWithIndices.length > 0 ? eventsWithIndices[eventsWithIndices.length - 1].end : 0,
+    eventsWithIndices.length > 0 ? Math.max(eventsWithIndices[eventsWithIndices.length - 1].eventDate.getEndPosition() + 5, 2020.00) : 0,
     [eventsWithIndices]
   );
 
@@ -78,6 +81,8 @@ function Timeline() {
   const timelineWidth = (totalRange / viewRange) * 100; // percentage
 
   let tickmarks = [];
+  console.log("Timeline Start:", timelineStart, "Timeline End:", timelineEnd);
+  console.log("Events with Indices:", eventsWithIndices);
   for (let year = timelineStart; year <= timelineEnd; year += increment) {
     tickmarks.push(year);
   }
@@ -139,6 +144,11 @@ function Timeline() {
     }, 0);
   };
 
+  const createEvent = () => {
+    router.push('/create-event');
+  };
+
+
   if(loading) {
     return <div>Loading events...</div>;
   }
@@ -149,6 +159,7 @@ function Timeline() {
         <button onClick={zoomIn}>Zoom In</button>
         <button onClick={zoomOut}>Zoom Out</button>
         <button onClick={() => setCompact(!compact)}>{compact ? "Regular View" : "Compact View"}</button>
+        <button onClick={createEvent}>Create an Event</button>
       </div>
 
       <div className={styles.timelineBar} style={{ width: `${timelineWidth}%` }}>
@@ -164,8 +175,9 @@ function Timeline() {
         {eventsWithIndices.map((event, idx) => (
           <Event
             key={idx}
-            start={event.start}
-            end={event.end}
+            eventID={event.id}
+            start={event.eventDate.getStartPosition()}
+            end={event.eventDate.getEndPosition()}
             index={event.index}
             date={event.date}
             title={event.title}
