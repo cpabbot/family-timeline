@@ -17,16 +17,16 @@ export default function CreateEvent() {
     end: ""
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async ({ title, description, eventDate }) => {
+    console.log("Submitting event with data:", { title, description, eventDate });
     try {
       await createEvent({
-        title: formData.title,
-        description: formData.description,
+        title: title,
+        description: description,
         eventDate: {
-          precision: formData.precision,
-          start: formData.start,
-          end: formData.end
+          precision: eventDate.precision,
+          start: eventDate.getStart().toISOString(),
+          end: eventDate.getEnd() ? eventDate.getEnd().toISOString() : null
         }
       });
       router.push('/');

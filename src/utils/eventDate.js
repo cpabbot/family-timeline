@@ -25,7 +25,16 @@ export class EventDate {
     }
 
     getEnd() {
-        return this.end;
+        if (this.end) {
+            return this.end;
+        }
+        if (this.precision === 'year') {
+            return new Date(this.start.getFullYear() + 1, 0, 0);
+        }
+        if (this.precision === 'month') {
+            return new Date(this.start.getFullYear(), this.start.getMonth() + 1, 0);
+        }
+        return new Date(this.start.getFullYear(), this.start.getMonth(), this.start.getDate() + 1);
     }
 
     getStartPosition() {
@@ -34,11 +43,10 @@ export class EventDate {
     }
 
     getEndPosition() {
-        // console.log("end position", this.end, this.getStartPosition());
-        if(this.end) {
-            return this.end.getFullYear() + Math.round(this.end.getMonth() / 11 * 100) / 100;
-        } else {
-            return this.getStartPosition();
+        let endPosition = this.getEnd().getFullYear() + Math.round(this.getEnd().getMonth() / 11 * 100) / 100;
+        if (endPosition - this.getStartPosition() < 0.01) {
+            endPosition = this.getStartPosition() + 0.01; // Minimum width for visibility
         }
+        return endPosition;
     }
 }

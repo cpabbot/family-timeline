@@ -12,7 +12,9 @@ function assignEventIndices(events) {
   const rows = [];
   sorted.forEach(event => {
     let assigned = false;
+    // Find the first row where this event can fit (i.e., starts after the last event in that row ends)
     for (let i = 0; i < rows.length; i++) {
+      // If the event starts after the last event in this row ends, it can go in this row
       if (event.eventDate.getStartPosition() >= rows[i]) {
         event.index = i;
         rows[i] = event.eventDate.getEndPosition();
@@ -33,10 +35,11 @@ function Timeline() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const eventsWithIndices = useMemo(() => 
-    events.length > 0 ? assignEventIndices(events) : [],
-    [events]
-  );
+  const eventsWithIndices = useMemo(() => {
+    const result = events.length > 0 ? assignEventIndices(events) : [];
+    console.log("Indexed Events:", result);
+    return result;
+  }, [events]);
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -81,8 +84,6 @@ function Timeline() {
   const timelineWidth = (totalRange / viewRange) * 100; // percentage
 
   let tickmarks = [];
-  console.log("Timeline Start:", timelineStart, "Timeline End:", timelineEnd);
-  console.log("Events with Indices:", eventsWithIndices);
   for (let year = timelineStart; year <= timelineEnd; year += increment) {
     tickmarks.push(year);
   }

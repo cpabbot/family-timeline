@@ -26,7 +26,7 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
       start: startDate,
       end: endDate
     });
-    
+
     await onSave({
       title,
       description,
