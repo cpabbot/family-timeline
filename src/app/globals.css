@@ -53,7 +53,6 @@ html, body {
     outline: none;
     background-color: #eee;
     border-radius : 10px;
-    cursor: pointer;
 }
 
 .input-group label {

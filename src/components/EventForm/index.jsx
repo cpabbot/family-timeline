@@ -17,15 +17,16 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
   const [endDate, setEndDate] = useState(
     event?.eventDate?.end ? event.eventDate.end.toISOString().split('T')[0] : null
   );
-  const [precision, setPrecision] = useState(event?.eventDate?.precision || "day");
-  const [isRange, setIsRange] = useState(!!event?.eventDate?.end);
+  const [precision, setPrecision] = useState(event?.eventDate?.precision || "year");
+
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const eventDate = new EventDate({
       precision,
       start: startDate,
-      end: isRange ? endDate : null
+      end: endDate
     });
 
     await onSave({
@@ -36,41 +37,31 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
   };
 
   // Helper to render the appropriate date input based on precision
-  const renderDateInput = (value, onChange, label) => {
-    switch (precision) {
-      case 'year':
-        return (
-          <input
-            type="number"
-            min="1000"
-            max="3000"
-            value={value ? value.split('-')[0] : ''}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="YYYY"
-            aria-label={label}
-            className="input"
-          />
-        );
-      case 'month':
-        return (
-          <input
-            type="month"
-            value={value ? value.slice(0, 7) : ''}
-            onChange={(e) => onChange(e.target.value)}
-            aria-label={label}
-          />
-        );
-      case 'day':
-      default:
-        return (
-          <input
-            type="date"
-            value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
-            aria-label={label}
-          />
-        );
+  const getDateInputProps = (value, onChange) => {
+    if (precision === "year") {
+      return {
+        type: "number",
+        min: "1000",
+        max: "3000",
+        value: value ? value.split("-")[0] : "",
+        placeholder: "YYYY",
+        onChange: (e) => onChange(e.target.value)
+      };
     }
+
+    if (precision === "month") {
+      return {
+        type: "month",
+        value: value ? value.slice(0, 7) : "",
+        onChange: (e) => onChange(e.target.value)
+      };
+    }
+
+    return {
+      type: "date",
+      value: value || "",
+      onChange: (e) => onChange(e.target.value)
+    };
   };
 
   const eventDateBlock = isEditing ? (
@@ -90,31 +81,25 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
         ))}
       </div>
 
-      <div className="flex-column input-group">
-        <label>Start Date:</label>
-        {renderDateInput(startDate, setStartDate, "Start date")}
-      </div>
-
-      <div className={styles.rangeToggle}>
-        <label>
+      <div className="flex-row">
+        <div className="flex-column input-group">
+          <label>Start Date:</label>
           <input
-            type="checkbox"
-            checked={isRange}
-            onChange={(e) => {
-              setIsRange(e.target.checked);
-              if (!e.target.checked) setEndDate(null);
-            }}
+            aria-label="Start Date"
+            className={`input ${styles.dateInput}`}
+            {...getDateInputProps(startDate, setStartDate)}
           />
-          {' '}Date Range
-        </label>
-      </div>
-
-      {isRange && (
-        <div className={styles.dateField}>
-          <label>End Date:</label>
-          {renderDateInput(endDate, setEndDate, "End date")}
         </div>
-      )}
+
+        <div className="flex-column input-group">
+          <label>End Date (optional):</label>
+          <input
+            aria-label="End Date"
+            className={`input ${styles.dateInput}`}
+            {...getDateInputProps(endDate, setEndDate)}
+          />
+        </div>
+      </div>
     </div>
   ) : (
     <span className={styles.date}>{event?.eventDate.format()}</span>
@@ -138,6 +123,7 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
                 onChange={(e) => setTitle(e.target.value)}
                 className={`input ${styles.titleInput}`}
                 placeholder="Event Title"
+                autoFocus={isNewEvent}
               />
             ) : (
               <h1 className={"title"}>{event?.title || "Untitled event"}</h1>
