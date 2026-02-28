@@ -2,8 +2,9 @@ export class EventDate {
     constructor({ precision, start, end } = {}) {
         this.precision = precision || 'day'; // 'year', 'month', 'day'
         // Accept ISO strings or Date objects
-        this.start = start instanceof Date ? start : new Date(start); // Date object
-        this.end = end ? (end instanceof Date ? end : new Date(end)) : null;     // Date object (optional)
+        // ISO strings have 'Z' UTC indicator removed so we can interpret as local time
+        this.start = start instanceof Date ? start : new Date(start.replace('Z', '')); // Date object
+        this.end = end ? (end instanceof Date ? end : new Date(end.replace('Z', ''))) : null;     // Date object (optional)
     }
 
     format() {
