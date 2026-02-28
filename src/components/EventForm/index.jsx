@@ -19,8 +19,6 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
   );
   const [precision, setPrecision] = useState(event?.eventDate?.precision || "year");
 
-  
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const eventDate = new EventDate({
@@ -34,6 +32,7 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
       description,
       eventDate
     });
+    setIsEditing(false);
   };
 
   // Helper to render the appropriate date input based on precision
