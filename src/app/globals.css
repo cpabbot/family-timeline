@@ -1,9 +1,13 @@
 :root {
     --primary: #555;
+    --primary: #563f02;
     --secondary: #ccc;
-    --accent: #7b6021;
-    --text: #333;
+    --accent: #79a346;
+    --accent2: #598326;
+    --text: #444;
+    /* --text: var(--primary); */
     --text-inverted: #fff;
+    --subtext: #555;
 }
 
 html {

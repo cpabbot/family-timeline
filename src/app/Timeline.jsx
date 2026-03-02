@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import styles from "./timeline.module.css";
 import Event from "./Event";
 import eventService from "../services/event";
+import { FaMagnifyingGlassPlus, FaMagnifyingGlassMinus, FaPlus } from "react-icons/fa6";
+import Button from "../components/Button";
 
 function assignEventIndices(events) {
   // Sort by start time for consistency
@@ -156,11 +158,11 @@ function Timeline() {
 
   return (
     <div className={styles.timelineContainer}>
-      <div className={styles.zoomContainer}>
-        <button onClick={zoomIn}>Zoom In</button>
-        <button onClick={zoomOut}>Zoom Out</button>
-        <button onClick={() => setCompact(!compact)}>{compact ? "Regular View" : "Compact View"}</button>
-        <button onClick={createEvent}>Create an Event</button>
+      <div className={`flex-column ${styles.zoomContainer}`}>
+        <Button onClick={zoomIn} actionButton><FaMagnifyingGlassPlus /></Button>
+        <Button onClick={zoomOut} actionButton><FaMagnifyingGlassMinus /></Button>
+        <Button onClick={() => setCompact(!compact)} actionButton>{compact ? "Regular View" : "Compact View"}</Button>
+        <Button onClick={createEvent} actionButton><FaPlus /> Create an Event</Button>
       </div>
 
       <div className={styles.timelineBar} style={{ width: `${timelineWidth}%` }}>

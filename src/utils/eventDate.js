@@ -25,13 +25,13 @@ export class EventDate {
 
     getStartPosition() {
         if(!this.start) { return -1 ;}
-        const parts = EventDate.splitDate(this.getStart());
+        const parts = EventDate.splitDate(this.getStart(), true);
         return Math.round(parts.year + (parts.month - 1) / 12); // e.g., 1990.25 for April 1990
     }
 
     getEndPosition() {
         if(this.getEnd()) {
-            const parts = EventDate.splitDate(this.getEnd());
+            const parts = EventDate.splitDate(this.getEnd(), true);
             return Math.round(parts.year + (parts.month - 1) / 12); // e.g., 1990.25 for April 1990
         }
         else if (this.precision === 'year') {
@@ -69,13 +69,13 @@ export class EventDate {
         return `${parts.year}-${parts.month || "01"}-${parts.day || "01"}`;
     }
 
-    static splitDate(dateString) {
+    static splitDate(dateString, useInt = false) {
         const datePart = dateString.split('T')[0];
         const parts = datePart.split('-');
         return {
-            year: parseInt(parts[0], 10),
-            month: parseInt(parts[1], 10) || 1,
-            day: parseInt(parts[2], 10) || 1
+            year: useInt ? parseInt(parts[0], 10) : parts[0],
+            month: useInt ? parseInt(parts[1], 10) || 1 : parts[1] || "01",
+            day: useInt ? parseInt(parts[2], 10) || 1 : parts[2] || "01"
         };
     }
 }
