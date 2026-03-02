@@ -12,10 +12,12 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
   const [title, setTitle] = useState(event?.title || "");
   const [description, setDescription] = useState(event?.description || "");
   const [startDate, setStartDate] = useState(
-    event?.eventDate?.start ? event.eventDate.start.toISOString().split('T')[0] : ""
+    event?.eventDate?.getStart() ?? ""
+    // event?.eventDate?.start ? event.eventDate.start.toISOString().split('T')[0] : ""
   );
   const [endDate, setEndDate] = useState(
-    event?.eventDate?.end ? event.eventDate.end.toISOString().split('T')[0] : null
+    event?.eventDate?.getEnd() ?? ""
+    // event?.eventDate?.end ? event.eventDate.end.toISOString().split('T')[0] : null
   );
   const [precision, setPrecision] = useState(event?.eventDate?.precision || "year");
 
@@ -63,6 +65,12 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
     };
   };
 
+  const handlePrecisionChange = (newPrecision) => {
+    setPrecision(newPrecision);
+    setStartDate(EventDate.trimPrecision(startDate, newPrecision));
+    setEndDate(EventDate.trimPrecision(endDate, newPrecision));
+  }
+
   const eventDateBlock = isEditing ? (
     <div className='flex-column'>
       <div className="flex-row">
@@ -73,7 +81,7 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
               name="precision"
               value={p}
               checked={precision === p}
-              onChange={(e) => setPrecision(e.target.value)}
+              onChange={(e) => handlePrecisionChange(e.target.value)}
             />
             {p.charAt(0).toUpperCase() + p.slice(1)}
           </label>

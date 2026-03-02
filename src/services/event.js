@@ -13,11 +13,11 @@ class EventService {
     try {
       if (useMockData) {
         return [
-          { id: 1, start: 2001.00, end: 2002.00, date: "June 2001", title: "title", description: "description", eventDate: new EventDate({ type: 'single', precision: 'month', start: new Date(2001, 5), end: null }) },
-          { id: 2, start: 2005.00, end: 2010.00, date: "2005 - 2010", title: "Another Event", description: "This is another event description.", eventDate: new EventDate({ type: 'range', precision: 'year', start: new Date(2005, 0), end: new Date(2010, 11) }) },
-          { id: 3, start: 2001.00, end: 2003.00, date: "2001 - 2003", title: "Third Event", description: "Details about the third event go here.", eventDate: new EventDate({ type: 'range', precision: 'year', start: new Date(2001, 0), end: new Date(2003, 11) }) },
-          { id: 4, start: 1995.00, end: 2007.00, date: "1995 - 2007", title: "Long Event", description: "Information about the fourth event.", eventDate: new EventDate({ type: 'range', precision: 'year', start: new Date(1995, 0), end: new Date(2007, 11) }) },
-          { id: 5, start: 1950.00, end: 1951.00, date: "1950 - 1951", title: "Old Event", description: "Description of the old event.", eventDate: new EventDate({ type: 'range', precision: 'year', start: new Date(1950, 0), end: new Date(1951, 11) }) }
+          { id: 1, start: 2001.00, end: 2002.00, title: "title", description: "description", eventDate: new EventDate({ precision: 'month', start: '2001-05', end: null }) },
+          { id: 2, start: 2005.00, end: 2010.00, title: "Another Event", description: "This is another event description.", eventDate: new EventDate({ precision: 'year', start: '2005-01', end: '2010-12' }) },
+          { id: 3, start: 2001.00, end: 2003.00, title: "Third Event", description: "Details about the third event go here.", eventDate: new EventDate({ precision: 'year', start: '2001-01', end: '2003-12' }) },
+          { id: 4, start: 1995.00, end: 2007.00, title: "Long Event", description: "Information about the fourth event.", eventDate: new EventDate({ precision: 'year', start: '1995-01', end: '2007-12' }) },
+          { id: 5, start: 1950.00, end: 1951.00, title: "Old Event", description: "Description of the old event.", eventDate: new EventDate({ precision: 'year', start: '1950-01', end: '1951-12' }) }
         ];
       }
 
@@ -45,7 +45,7 @@ class EventService {
   async getEventById(eventID) {
     try {
       if (useMockData) {
-        return { id: eventID, start: 2001.00, end: 2002.00, date: "June 2001", title: "Mock Event", description: "This is a mock event description." };
+        return { id: eventID, start: 2001.00, end: 2002.00, title: "Mock Event", description: "This is a mock event description.", eventDate: new EventDate({ precision: 'month', start: '2001-06', end: null }) };
       }
 
       const docRef = doc(db, "events", eventID);
@@ -92,8 +92,8 @@ class EventService {
       const eventRef = doc(db, "events", eventID);
       const eventDate = { 
         precision: updatedEventData.eventDate.precision,
-        start: updatedEventData.eventDate.getStart().toISOString(),
-        end: updatedEventData.eventDate.getEnd() ? updatedEventData.eventDate.getEnd().toISOString() : null
+        start: updatedEventData.eventDate.getStart(),
+        end: updatedEventData.eventDate.getEnd() ?? null
        };
        updatedEventData.eventDate = eventDate;
       await setDoc(eventRef, updatedEventData);
