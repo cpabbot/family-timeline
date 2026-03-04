@@ -1,8 +1,7 @@
 .event {
-  padding: 0.3rem 0.5rem;
   border-radius: 0.5rem;
   position: absolute;
-  background-color: #eee;
+  background-color: #eeeeee;
   margin-top: 0.5rem;
   overflow: hidden;
   height: 8rem;
@@ -17,9 +16,21 @@
   margin: 0 0 0.2rem 0;
   font-size: 1.1rem;
   color: var(--text);
+  font-weight: normal;
 }
 
-.content p {
-  margin: 0;
+.dateContainer {
+  white-space: nowrap;
+  overflow: hidden;
+  background-color: var(--secondary);
+  min-height: 2rem;
+}
+
+.eventDate {
   color: var(--subtext);
+  font-size: 0.8em;
+}
+
+.titleContainer {
+  flex: 1;
 }

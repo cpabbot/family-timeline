@@ -5,10 +5,10 @@ export class EventDate {
         this.end = end;
     }
 
-    format() {
-        let formatted = EventDate.formatDate(this.start, this.precision);
+    format(shortMonth = false) {
+        let formatted = EventDate.formatDate(this.start, this.precision, shortMonth);
         if (this.end) {
-            formatted += ' – ' + EventDate.formatDate(this.end, this.precision);
+            formatted += ' – ' + EventDate.formatDate(this.end, this.precision, shortMonth);
         }
         return formatted;
     }
@@ -26,13 +26,13 @@ export class EventDate {
     getStartPosition() {
         if(!this.start) { return -1 ;}
         const parts = EventDate.splitDate(this.getStart(), true);
-        return Math.round(parts.year + (parts.month - 1) / 12); // e.g., 1990.25 for April 1990
+        return Math.round((parts.year + (parts.month - 1) / 12) * 100) / 100; // e.g., 1990.25 for April 1990
     }
 
     getEndPosition() {
         if(this.getEnd()) {
             const parts = EventDate.splitDate(this.getEnd(), true);
-            return Math.round(parts.year + (parts.month - 1) / 12); // e.g., 1990.25 for April 1990
+            return Math.round((parts.year + (parts.month - 1) / 12) * 100) / 100; // e.g., 1990.25 for April 1990
         }
         else if (this.precision === 'year') {
             return this.getStartPosition() + 1;
@@ -42,16 +42,19 @@ export class EventDate {
         }
     }
 
-    static monthName(m) {
+    static monthName(m, shortMonth = false) {
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        if (shortMonth) {
+            return months[(m || 1) - 1].substring(0, 3);
+        }
         return months[(m || 1) - 1];
     }
 
-    static formatDate(dateString, precision) {
+    static formatDate(dateString, precision, shortMonth = false) {
         const parts = EventDate.splitDate(dateString);
         let formattedDate = '';
         if (precision === 'month' || precision === 'day') {
-            formattedDate += EventDate.monthName(parts.month) + ' ';
+            formattedDate += EventDate.monthName(parts.month, shortMonth) + ' ';
         }
         if (precision === 'day') {
             formattedDate += Number(parts.day) + ', ';

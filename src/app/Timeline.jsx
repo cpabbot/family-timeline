@@ -179,10 +179,8 @@ function Timeline() {
           <Event
             key={idx}
             eventID={event.id}
-            start={event.eventDate.getStartPosition()}
-            end={event.eventDate.getEndPosition()}
+            eventDate={event.eventDate}
             index={event.index}
-            date={event.date}
             title={event.title}
             description={event.description}
             timelineStart={timelineStart}

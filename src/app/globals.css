@@ -1,7 +1,7 @@
 :root {
     --primary: #555;
     --primary: #563f02;
-    --secondary: #ccc;
+    --secondary: #ece1cb; /* ebefc4; */
     --accent: #79a346;
     --accent2: #598326;
     --text: #444;
@@ -34,6 +34,10 @@ html, body {
     padding: 1rem 2rem;
 }
 
+.padded-sm {
+    padding: 0.4rem 0.5rem;
+}
+
 .flex-row {
     display: flex;
     flex-direction: row;
@@ -45,6 +49,10 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+}
+
+.no-gap {
+    gap: 0;
 }
 
 .grow {
