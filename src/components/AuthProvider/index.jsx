@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, googleProvider, db } from "../../firebase";
 
 const AuthContext = createContext(null);
@@ -17,12 +17,24 @@ export default function AuthProvider({ children }) {
       setUser(currentUser);
       
       if (currentUser) {
-        // Check if user is allowed in Firestore users collection
+        // Check if user document exists
         try {
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          let userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          
+          // If user doesn't exist, create it
+          if (!userDoc.exists()) {
+            await setDoc(doc(db, "users", currentUser.uid), {
+              email: currentUser.email,
+              role: "pending", // pending, viewer, editor, admin
+              createdAt: new Date().toISOString()
+            });
+            // Refresh the doc check
+            userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          }
+          
           setAllowed(userDoc.exists());
         } catch (error) {
-          console.error("Error checking user access:", error);
+          console.error("Error checking/creating user:", error);
           setAllowed(false);
         }
       } else {

@@ -10,16 +10,17 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    // Users collection - read own doc, no client writes
+    // Users collection - users can create own doc, read own, no updates
     match /users/{userId} {
+      allow create: if request.auth != null && request.auth.uid == userId;
       allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if false; // Only admins via Firebase Console
+      allow update, delete: if false; // Admins only via Firebase Console
     }
 
-    // Events collection - only allowed users
+    // Events collection - role-based access
     match /events/{eventId} {
-      allow read: if userExists();
-      allow write: if userExists() && getUser().write == true;
+      allow read: if userExists() && getUser().role in ["viewer", "editor", "admin"];
+      allow write: if userExists() && getUser().role in ["editor", "admin"];
     }
 
     // Deny everything else
