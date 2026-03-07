@@ -1,11 +1,14 @@
 .header {
     height: 18vh;
+    padding: 1rem 3rem;
+    display: flex;
+    align-items: center;
 }
 
 .title {
     font-weight: normal;
     color: var(--text);
-    padding: 3rem 4rem;
+    /* padding: 3rem 4rem; */
     margin: 0;
     font-size: 2em;
 }

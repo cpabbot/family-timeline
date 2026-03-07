@@ -1,0 +1,74 @@
+.header {
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backLink {
+  text-decoration: none;
+  color: #0066cc;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.title {
+  margin: 0;
+  flex: 1;
+  font-size: 1.5rem;
+}
+
+.container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #eee;
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 1rem 0;
+}
+
+.setting {
+  margin: 1rem 0;
+}
+
+.setting label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.setting input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.dangerButton {
+  padding: 0.8rem 1.5rem;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.dangerButton:hover {
+  background-color: #d32f2f;
+}

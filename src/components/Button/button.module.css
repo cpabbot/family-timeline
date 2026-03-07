@@ -3,36 +3,41 @@
     border: none;
     cursor: pointer;
     color: var(--text-inverted);
-    border-radius: 5px;
+    border-radius: 8px;
     padding: 0.8rem 1.5rem;
     font-size: 1rem;
-    
-    background-color: #fff;
-    border: 2px solid var(--accent);
-    color: var(--accent);
+
+    /* background-color: #fff; */
+    /* border: 2px solid var(--accent); */
+    /* color: var(--accent); */
     font-weight: bold;
+
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    
+    background-color: var(--accent);
+    color: var(--text-inverted);
+    border: none;
+    /* border-radius: 12px; */
 }
 
 .btn:hover {
     color: var(--text-inverted);
-    background-color: var(--accent);
+    /* background-color: var(--accent); */
+    background-color: var(--accent2);
 }
-
+/* 
 .actionButton {
-    /* padding: 0.8em; */
-    width: fit-content;
     background-color: var(--accent);
     color: var(--text-inverted);
     border: none;
     border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
 }
 
 .actionButton:hover {
     background-color: var(--accent2);
-}
+} */
 
 .actionButton svg {
     width: 1.3em;

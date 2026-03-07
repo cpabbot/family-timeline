@@ -74,6 +74,14 @@ function Timeline() {
   const [increment, setIncrement] = useState(5);
   const [compact, setCompact] = useState(false);
 
+  // Load compact setting from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("compactView");
+    if (saved !== null) {
+      setCompact(JSON.parse(saved));
+    }
+  }, []);
+
   // Initialize view range once
   useEffect(() => {
     setStart(timelineStart);
@@ -161,7 +169,6 @@ function Timeline() {
       <div className={`flex-column ${styles.zoomContainer}`}>
         <Button onClick={zoomIn} actionButton><FaMagnifyingGlassPlus /></Button>
         <Button onClick={zoomOut} actionButton><FaMagnifyingGlassMinus /></Button>
-        <Button onClick={() => setCompact(!compact)} actionButton>{compact ? "Regular View" : "Compact View"}</Button>
         <Button onClick={createEvent} actionButton><FaPlus /> Create an Event</Button>
       </div>
 
