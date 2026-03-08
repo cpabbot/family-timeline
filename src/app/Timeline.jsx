@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from 'next/navigation';
 import styles from "./timeline.module.css";
 import Event from "./Event";
@@ -34,6 +34,7 @@ function assignEventIndices(events) {
 
 function Timeline() {
   const router = useRouter();
+  const timelineContainerRef = useRef(null);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -71,7 +72,6 @@ function Timeline() {
   // View range (what's currently visible - changes with zoom)
   const [start, setStart] = useState(1950.00);
   const [end, setEnd] = useState(2030.00);
-  const [increment, setIncrement] = useState(5);
   const [compact, setCompact] = useState(false);
 
   // Load compact setting from localStorage
@@ -93,15 +93,36 @@ function Timeline() {
   const viewRange = end - start;
   const timelineWidth = (totalRange / viewRange) * 100; // percentage
 
-  let tickmarks = [];
-  for (let year = timelineStart; year <= timelineEnd; year += increment) {
-    tickmarks.push(year);
-  }
+  const pixelsPerYear = useMemo(() => {
+    const containerWidth = timelineContainerRef.current?.clientWidth || 0;
+
+    if (containerWidth <= 0 || viewRange <= 0) { return 0; }
+    return containerWidth / viewRange;
+  }, [viewRange]);
+
+  const increment = useMemo(() => {
+    if (pixelsPerYear >= 80) { return 1; }
+    if (pixelsPerYear >= 35) { return 2; }
+    return 4;
+  }, [pixelsPerYear]);
+
+  const tickmarks = useMemo(() => {
+    if (totalRange <= 0) { return []; }
+
+    const marks = [];
+    const firstTick = Math.ceil(timelineStart / increment) * increment;
+
+    for (let year = firstTick; year <= timelineEnd; year += increment) {
+      marks.push(Number(year.toFixed(2)));
+    }
+
+    return marks;
+  }, [timelineStart, timelineEnd, increment, totalRange]);
 
   const zoomIn = () => {
     const currentRange = end - start;
     if (currentRange > 20) { // Prevents over-zooming
-      const container = document.querySelector(`.${styles.timelineContainer}`);
+      const container = timelineContainerRef.current;
       const containerWidth = container.clientWidth;
       const scrollCenter = container.scrollLeft + containerWidth / 2;
       const totalWidth = container.scrollWidth;
@@ -128,7 +149,7 @@ function Timeline() {
   };
 
   const zoomOut = () => {
-    const container = document.querySelector(`.${styles.timelineContainer}`);
+    const container = timelineContainerRef.current;
     const containerWidth = container.clientWidth;
     const scrollCenter = container.scrollLeft + containerWidth / 2;
     const totalWidth = container.scrollWidth;
@@ -165,7 +186,7 @@ function Timeline() {
   }
 
   return (
-    <div className={styles.timelineContainer}>
+    <div ref={timelineContainerRef} className={styles.timelineContainer}>
       <div className={`flex-column ${styles.zoomContainer}`}>
         <Button onClick={zoomIn} type="action"><FaMagnifyingGlassPlus /></Button>
         <Button onClick={zoomOut} type="action"><FaMagnifyingGlassMinus /></Button>
