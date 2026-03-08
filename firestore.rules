@@ -23,6 +23,12 @@ service cloud.firestore {
       allow write: if userExists() && getUser().role in ["editor", "admin"];
     }
 
+    // Event content collection - role-based access
+    match /eventContents/{contentId} {
+      allow read: if userExists() && getUser().role in ["viewer", "editor", "admin"];
+      allow write: if userExists() && getUser().role in ["editor", "admin"];
+    }
+
     // Deny everything else
     match /{document=**} {
       allow read, write: if false;

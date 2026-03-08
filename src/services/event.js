@@ -1,6 +1,7 @@
 import { getFirestore, collection, getDoc, getDocs, addDoc, setDoc, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase"
 import { EventDate } from "../utils/eventDate";
+import { getEventContent } from "./eventContent";
 
 const useMockData = false;
 
@@ -42,10 +43,26 @@ class EventService {
    * @param {string} eventID - ID of the event to fetch
    * @returns {Promise<Object>} Event object
    */
-  async getEventById(eventID) {
+  async getEventById(eventID, options = {}) {
     try {
+      const include = Array.isArray(options.include) ? options.include : [];
+      const includeContent = include.includes("content");
+
       if (useMockData) {
-        return { id: eventID, start: 2001.00, end: 2002.00, title: "Mock Event", description: "This is a mock event description.", eventDate: new EventDate({ precision: 'month', start: '2001-06', end: null }) };
+        const mockEvent = {
+          id: eventID,
+          start: 2001.00,
+          end: 2002.00,
+          title: "Mock Event",
+          description: "This is a mock event description.",
+          eventDate: new EventDate({ precision: 'month', start: '2001-06', end: null })
+        };
+
+        if (includeContent) {
+          mockEvent.content = await getEventContent(eventID);
+        }
+
+        return mockEvent;
       }
 
       const docRef = doc(db, "events", eventID);
@@ -55,6 +72,10 @@ class EventService {
           id: docSnap.id, ...docSnap.data(),
           eventDate: new EventDate(docSnap.data().eventDate)
         };
+        if (includeContent) {
+          event.content = await getEventContent(eventID);
+        }
+
         console.log(event)
         return event;
       } else {
@@ -124,7 +145,7 @@ const eventService = new EventService();
 // Named exports for convenience
 export const createEvent = (eventData) => eventService.createEvent(eventData);
 export const getEvents = () => eventService.getEvents();
-export const getEvent = (eventID) => eventService.getEventById(eventID);
+export const getEvent = (eventID, options) => eventService.getEventById(eventID, options);
 export const updateEvent = (eventID, updatedEventData) => eventService.updateEvent(eventID, updatedEventData);
 export const deleteEvent = (eventID) => eventService.deleteEvent(eventID);
 export default eventService;
