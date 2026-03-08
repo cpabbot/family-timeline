@@ -103,6 +103,20 @@ class EventService {
       throw error;
     }
   }
+
+  /**
+   * Delete an event by ID
+   * @param {string} eventID - ID of the event to delete
+   * @returns {Promise<void>}
+   */
+  async deleteEvent(eventID) {
+    try {
+      await deleteDoc(doc(db, "events", eventID));
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      throw error;
+    }
+  }
 }
 
 const eventService = new EventService();
@@ -112,5 +126,5 @@ export const createEvent = (eventData) => eventService.createEvent(eventData);
 export const getEvents = () => eventService.getEvents();
 export const getEvent = (eventID) => eventService.getEventById(eventID);
 export const updateEvent = (eventID, updatedEventData) => eventService.updateEvent(eventID, updatedEventData);
-
+export const deleteEvent = (eventID) => eventService.deleteEvent(eventID);
 export default eventService;

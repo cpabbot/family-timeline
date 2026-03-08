@@ -140,9 +140,6 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
           <Button text={isEditing ? "Save" : "Edit Event"} onClick={isEditing ? handleSubmit : () => setIsEditing(true)} />
         </div>
       </div>
-      <div className="container">
-        <p>{event?.description || "New event description"}</p>
-      </div>
     </div>
   );
 }

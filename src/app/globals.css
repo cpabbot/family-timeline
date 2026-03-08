@@ -8,6 +8,8 @@
     /* --text: var(--primary); */
     --text-inverted: #fff;
     --subtext: #555;
+    --error: #e74c3c;
+    --error2: #c0392b;
 }
 
 html {

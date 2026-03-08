@@ -39,7 +39,16 @@
     background-color: var(--accent2);
 } */
 
-.actionButton svg {
+.action svg {
     width: 1.3em;
     height: 1.3em;
+}
+
+.delete {
+    background-color: var(--error);
+    color: var(--text-inverted);
+}
+
+.delete:hover {
+    background-color: var(--error2);
 }

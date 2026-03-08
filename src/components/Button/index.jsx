@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./button.module.css";
 
-export default function Button({ text = "", onClick, children, actionButton = false, href }) {
+export default function Button({ text = "", onClick, children, type, href }) {
   const router = useRouter();
 
   const handleClick = () => {
@@ -14,7 +14,7 @@ export default function Button({ text = "", onClick, children, actionButton = fa
   };
 
   return (
-    <button className={`${styles.btn} ${actionButton ? styles.actionButton : ""}`} onClick={handleClick}>
+    <button className={`${styles.btn} ${styles[type]}`} onClick={handleClick}>
       {text || children}
     </button>
   )
