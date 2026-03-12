@@ -94,6 +94,12 @@ class EventService {
    */
   async createEvent(eventData) {
     try {
+      const eventDate = { 
+        precision: eventData.eventDate.precision,
+        start: eventData.eventDate.getStart(),
+        end: eventData.eventDate.getEnd() ?? null
+       };
+       eventData.eventDate = eventDate;
       const docRef = await addDoc(collection(db, "events"), eventData);
       return { id: docRef.id, ...eventData };
     } catch (error) {

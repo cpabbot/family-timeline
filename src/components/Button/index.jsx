@@ -5,11 +5,11 @@ import styles from "./button.module.css";
 export default function Button({ text = "", onClick, children, type, buttonType, href }) {
   const router = useRouter();
 
-  const handleClick = () => {
+  const handleClick = (e) => {
     if (href) {
       router.push(href);
     } else if (onClick) {
-      onClick();
+      onClick(e);
     }
   };
 

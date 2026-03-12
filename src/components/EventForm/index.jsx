@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// import { getEvent, updateEvent } from "../../../services/event";
 import { EventDate } from "../../utils/eventDate";
 import styles from "./eventForm.module.css";
 import BackButton from "/src/components/BackButton";
@@ -11,14 +10,8 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
   const [isEditing, setIsEditing] = useState(isNewEvent);
   const [title, setTitle] = useState(event?.title || "");
   const [description, setDescription] = useState(event?.description || "");
-  const [startDate, setStartDate] = useState(
-    event?.eventDate?.getStart() ?? ""
-    // event?.eventDate?.start ? event.eventDate.start.toISOString().split('T')[0] : ""
-  );
-  const [endDate, setEndDate] = useState(
-    event?.eventDate?.getEnd() ?? ""
-    // event?.eventDate?.end ? event.eventDate.end.toISOString().split('T')[0] : null
-  );
+  const [startDate, setStartDate] = useState(event?.eventDate?.getStart() ?? "");
+  const [endDate, setEndDate] = useState(event?.eventDate?.getEnd() ?? "");
   const [precision, setPrecision] = useState(event?.eventDate?.precision || "year");
 
   const handleSubmit = async (e) => {
@@ -119,7 +112,7 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
   return (
     <div className="container">
       <div className={styles.header}>
-        <div className="container flex-row">
+        <form className="container flex-row" onSubmit={handleSubmit}>
           <BackButton href="/" />
           <div className="flex-column grow">
             { isEditing ? (
@@ -137,8 +130,11 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
             )}
             {eventDateBlock}
           </div>
-          <Button text={isEditing ? "Save" : "Edit Event"} onClick={isEditing ? handleSubmit : () => setIsEditing(true)} />
-        </div>
+          <Button text={isEditing ? "Save" : "Edit Event"} onClick={isEditing ? undefined : (e) => {
+            e.preventDefault();
+            setIsEditing(true);
+          }} buttonType={isEditing ? "submit" : "button"} />
+        </form>
       </div>
     </div>
   );

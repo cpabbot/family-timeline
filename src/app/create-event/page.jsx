@@ -13,11 +13,7 @@ export default function CreateEvent() {
       await createEvent({
         title: title,
         description: description,
-        eventDate: {
-          precision: eventDate.precision,
-          start: eventDate.getStart().toISOString(),
-          end: eventDate.getEnd() ? eventDate.getEnd().toISOString() : null
-        }
+        eventDate: eventDate
       });
       router.push('/');
     } catch (error) {
