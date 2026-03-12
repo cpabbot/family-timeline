@@ -24,6 +24,7 @@
   overflow: hidden;
   background-color: var(--secondary);
   min-height: 2rem;
+  width: 100%;
 }
 
 .eventDate {
