@@ -225,8 +225,8 @@ function Timeline() {
   return (
     <div ref={timelineContainerRef} className={styles.timelineContainer}>
       <div className={`flex-column ${styles.zoomContainer}`}>
-        <Button onClick={zoomIn} type="action"><FaMagnifyingGlassPlus /></Button>
-        <Button onClick={zoomOut} type="action"><FaMagnifyingGlassMinus /></Button>
+        <Button onClick={() => zoomIn()} type="action"><FaMagnifyingGlassPlus /></Button>
+        <Button onClick={() => zoomOut()} type="action"><FaMagnifyingGlassMinus /></Button>
         <Button onClick={createEvent} type="action"><FaPlus /> Create an Event</Button>
       </div>
 
