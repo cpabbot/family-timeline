@@ -40,6 +40,9 @@ export class EventDate {
         else if (this.precision === 'month') {
             return this.getStartPosition() + 1/12;
         }
+        else if (this.precision === 'day') {
+            return this.getStartPosition() + 1/365;
+        }
     }
 
     static monthName(m, shortMonth = false) {
