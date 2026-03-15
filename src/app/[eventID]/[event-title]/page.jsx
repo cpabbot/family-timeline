@@ -8,12 +8,115 @@ import EventForm from "../../../components/EventForm";
 import Button from "../../../components/Button";
 import { useRouter } from "next/navigation";
 
+const EventContent = ({
+  eventContent,
+  isEditingContent,
+  handleSubmitContent,
+  selectedContentType,
+  setSelectedContentType,
+  contentDraft,
+  setContentDraft,
+  handleEditContent,
+}) => {
+  const CONTENT_TYPE_OPTIONS = [
+    { value: "text", label: "Description" },
+    { value: "youtube", label: "YouTube" },
+    { value: "google-doc", label: "Google Doc" },
+    { value: "link", label: "Link" },
+  ];
+
+  const displayedContent = (() => {
+    function getYouTubeVideoId(url = "") {
+      if (!url) return "";
+
+      // Handles: https://www.youtube.com/watch?v=VIDEO_ID
+      const watchIndex = url.indexOf("?v=");
+      if (watchIndex !== -1) {
+        const from = watchIndex + 3;
+        const end = url.indexOf("&", from);
+        return end === -1 ? url.slice(from) : url.slice(from, end);
+      }
+
+      // Handles: https://www.youtube.com/embed/VIDEO_ID?...
+      const embedIndex = url.indexOf("/embed/");
+      if (embedIndex !== -1) {
+        const from = embedIndex + "/embed/".length;
+        const end = url.indexOf("?", from);
+        return end === -1 ? url.slice(from) : url.slice(from, end);
+      }
+
+      return "";
+    }
+
+    switch (eventContent?.type) {
+      case "text":
+        return <p className={styles.contentBody}>{eventContent.body}</p>;
+      case "youtube":
+        const videoID = getYouTubeVideoId(eventContent.body);
+        return (
+          <iframe
+            width="560"
+            height="315"
+            src={`https://www.youtube.com/embed/${videoID}`}
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          ></iframe>
+        );
+      default:
+        return null;
+    }
+  })();
+
+  if (!eventContent || isEditingContent) {
+    return (
+      <form onSubmit={handleSubmitContent} className="flex-column gap full-width">
+        <textarea
+          name="contentBody"
+          value={contentDraft}
+          onChange={(eventObject) => setContentDraft(eventObject.target.value)}
+          placeholder="Add description"
+          className={`${styles.contentBody} input`}
+        />
+
+        <div>
+          <label htmlFor="contentType">Content type:</label>
+          <select
+            id="contentType"
+            className={'input'}
+            value={selectedContentType}
+            onChange={(eventObject) => setSelectedContentType(eventObject.target.value)}
+          >
+            {CONTENT_TYPE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <Button buttonType="submit">Save</Button>
+      </form>
+    );
+  }
+
+  return (
+    <>
+      {displayedContent}
+      <Button onClick={handleEditContent}>Edit</Button>
+    </>
+  );
+};
+
 export default function EventPage({ params }) {
   const router = useRouter();
   const [event, setEvent] = useState();
   const [eventContent, setEventContent] = useState(null);
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [contentDraft, setContentDraft] = useState("");
+  const [selectedContentType, setSelectedContentType] = useState("text");
 
   useEffect(() => {
     async function fetchEventAndContent() {
@@ -26,6 +129,7 @@ export default function EventPage({ params }) {
         setEventContent(singleContent);
         setIsEditingContent(false);
         setContentDraft("");
+        setSelectedContentType(singleContent?.type || "text");
       } catch (error) {
         console.error("Failed to fetch event:", error);
       }
@@ -69,13 +173,14 @@ export default function EventPage({ params }) {
 
     try {
       const createdContent = await createContent(params["eventID"], {
-        type: "description",
+        type: selectedContentType,
         body: contentDraft.trim(),
       });
       console.log("Created content:", createdContent);
       setEventContent(createdContent);
       setIsEditingContent(false);
       setContentDraft("");
+      setSelectedContentType(createdContent.type || "text");
     } catch (error) {
       console.error("Failed to create content:", error);
     }
@@ -84,6 +189,7 @@ export default function EventPage({ params }) {
   const handleEditContent = () => {
     setIsEditingContent(true);
     setContentDraft(eventContent?.body || "");
+    setSelectedContentType(eventContent?.type || "text");
   };
 
   const handleSaveContent = async (eventObject) => {
@@ -97,13 +203,14 @@ export default function EventPage({ params }) {
       const updated = await updateContent(eventContent.id, {
         ...eventContent,
         eventId: params["eventID"],
-        type: eventContent.type || "description",
+        type: selectedContentType,
         body: contentDraft.trim(),
       });
 
       setEventContent(updated);
       setIsEditingContent(false);
       setContentDraft("");
+      setSelectedContentType(updated.type || "text");
     } catch (error) {
       console.error("Failed to save content:", error);
     }
@@ -122,24 +229,19 @@ export default function EventPage({ params }) {
   return (
     <div>
       <EventForm event={event} onSave={handleSaveDate} />
+
       <main className="container flex-column gap">
         {/* <p>{event?.description || "New event description"}</p> */}
-        {!eventContent || isEditingContent ? (
-          <form onSubmit={handleSubmitContent}>
-            <textarea
-              value={contentDraft}
-              onChange={(eventObject) => setContentDraft(eventObject.target.value)}
-              placeholder="Add description"
-              className={`${styles.contentBody} input`}
-            />
-            <Button buttonType="submit">Save</Button>
-          </form>
-        ) : (
-          <>
-            <p className={styles.contentBody}>{eventContent.body}</p>
-            <Button onClick={handleEditContent}>Edit</Button>
-          </>
-        )}
+        <EventContent
+          eventContent={eventContent}
+          isEditingContent={isEditingContent}
+          handleSubmitContent={handleSubmitContent}
+          selectedContentType={selectedContentType}
+          setSelectedContentType={setSelectedContentType}
+          contentDraft={contentDraft}
+          setContentDraft={setContentDraft}
+          handleEditContent={handleEditContent}
+        />
 
         
         <Button type="delete" onClick={handleDelete}>Delete Event</Button>
