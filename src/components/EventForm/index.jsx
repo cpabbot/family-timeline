@@ -12,7 +12,7 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
   const [description, setDescription] = useState(event?.description || "");
   const [startDate, setStartDate] = useState(event?.eventDate?.getStart() ?? "");
   const [endDate, setEndDate] = useState(event?.eventDate?.getEnd() ?? "");
-  const [precision, setPrecision] = useState(event?.eventDate?.precision || "year");
+  const [precision, setPrecision] = useState(event?.eventDate?.precision || "day");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,7 +67,7 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
   const eventDateBlock = isEditing ? (
     <div className='flex-column'>
       <div className="flex-row">
-        {['year', 'month', 'day'].map((p) => (
+        {['day', 'month', 'year'].map((p) => (
           <label key={p} className={`${styles.radioLabel} ${precision === p ? styles.selected : ''}`}>
             <input
               type="radio"
@@ -83,7 +83,7 @@ export default function EventForm({ event, onSave, isNewEvent = false }) {
 
       <div className="flex-row">
         <div className="flex-column input-group">
-          <label>Start Date:</label>
+          <label>Date:</label>
           <input
             aria-label="Start Date"
             className={`input ${styles.dateInput}`}
