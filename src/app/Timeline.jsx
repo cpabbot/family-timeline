@@ -8,25 +8,32 @@ import eventService from "../services/event";
 import { FaMagnifyingGlassPlus, FaMagnifyingGlassMinus, FaPlus } from "react-icons/fa6";
 import Button from "../components/Button";
 
-function assignEventIndices(events) {
+function assignEventIndices(events, pixelsPerYear) {
   // Sort by start time for consistency
   const sorted = [...events].sort((a, b) => a.eventDate.getStartPosition() - b.eventDate.getStartPosition());
-  const rows = [];
+  
+  // Mimimum width for an event in year units (for modifying end positions)
+  const minWidthPixels = 80;
+  const minWidthYears = pixelsPerYear > 0 ? minWidthPixels / pixelsPerYear : 0;
+  
+  const rows = []; // array of end positions for each row
   sorted.forEach(event => {
+    const endPosition = Math.max(event.eventDate.getEndPosition(), event.eventDate.getStartPosition() + minWidthYears);
+    
     let assigned = false;
     // Find the first row where this event can fit (i.e., starts after the last event in that row ends)
     for (let i = 0; i < rows.length; i++) {
       // If the event starts after the last event in this row ends, it can go in this row
       if (event.eventDate.getStartPosition() >= rows[i]) {
         event.index = i;
-        rows[i] = event.eventDate.getEndPosition();
+        rows[i] = endPosition;
         assigned = true;
         break;
       }
     }
     if (!assigned) {
       event.index = rows.length;
-      rows.push(event.eventDate.getEndPosition());
+      rows.push(endPosition);
     }
   });
   return sorted;
@@ -38,12 +45,32 @@ function Timeline() {
   const lastZoomTimeRef = useRef(0);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [start, setStart] = useState(1950.00);
+  const [end, setEnd] = useState(2030.00);
+  const [compact, setCompact] = useState(false);
+
+  // Load compact setting from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("compactView");
+    if (saved !== null) {
+      setCompact(JSON.parse(saved));
+    }
+  }, []);
+
+  const pixelsPerYear = useMemo(() => {
+    const container = timelineContainerRef.current;
+    const viewRange = end - start;
+    if (container && container.clientWidth > 0 && viewRange > 0) {
+      return container.clientWidth / viewRange;
+    }
+    return 0;
+  }, [end, start]);
 
   const eventsWithIndices = useMemo(() => {
-    const result = events.length > 0 ? assignEventIndices(events) : [];
+    const result = events.length > 0 ? assignEventIndices(events, pixelsPerYear) : [];
     console.log("Indexed Events:", result);
     return result;
-  }, [events]);
+  }, [events, pixelsPerYear]);
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -69,19 +96,6 @@ function Timeline() {
     eventsWithIndices.length > 0 ? Math.max(eventsWithIndices[eventsWithIndices.length - 1].eventDate.getEndPosition() + 5, 2020.00) : 0,
     [eventsWithIndices]
   );
-
-  // View range (what's currently visible - changes with zoom)
-  const [start, setStart] = useState(1950.00);
-  const [end, setEnd] = useState(2030.00);
-  const [compact, setCompact] = useState(false);
-
-  // Load compact setting from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("compactView");
-    if (saved !== null) {
-      setCompact(JSON.parse(saved));
-    }
-  }, []);
 
   // Initialize view range once
   useEffect(() => {
@@ -127,13 +141,6 @@ function Timeline() {
   const totalRange = timelineEnd - timelineStart;
   const viewRange = end - start;
   const timelineWidth = (totalRange / viewRange) * 100; // percentage
-
-  const pixelsPerYear = useMemo(() => {
-    const containerWidth = timelineContainerRef.current?.clientWidth || 0;
-
-    if (containerWidth <= 0 || viewRange <= 0) { return 0; }
-    return containerWidth / viewRange;
-  }, [viewRange]);
 
   const increment = useMemo(() => {
     if (pixelsPerYear >= 80) { return 1; }
