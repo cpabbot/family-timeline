@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, use } from "react";
 import { useRouter } from 'next/navigation';
 import styles from "./timeline.module.css";
 import Event from "./Event";
@@ -45,8 +45,10 @@ function Timeline() {
   const lastZoomTimeRef = useRef(0);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [start, setStart] = useState(1950.00);
-  const [end, setEnd] = useState(2030.00);
+  const [timelineStart, setTimelineStart] = useState(1970.00);
+  const [timelineEnd, setTimelineEnd] = useState(new Date().getFullYear());
+  const [start, setStart] = useState(2010.00);
+  const [end, setEnd] = useState(new Date().getFullYear());
   const [compact, setCompact] = useState(false);
 
   // Load compact setting from localStorage
@@ -88,20 +90,10 @@ function Timeline() {
   }, []);
 
   // Total timeline range (never changes - based on all events)
-  const timelineStart = useMemo(() =>
-    eventsWithIndices.length > 0 ? Math.min(eventsWithIndices[0].eventDate.getStartPosition() - 5, 1970.00) : 0,
-    [eventsWithIndices]
-  );
-  const timelineEnd = useMemo(() =>
-    eventsWithIndices.length > 0 ? Math.max(eventsWithIndices[eventsWithIndices.length - 1].eventDate.getEndPosition() + 5, 2020.00) : 0,
-    [eventsWithIndices]
-  );
-
-  // Initialize view range once
   useEffect(() => {
-    setStart(timelineStart);
-    setEnd(timelineEnd);
-  }, [timelineStart, timelineEnd]);
+    setTimelineStart(eventsWithIndices.length > 0 ? Math.min(eventsWithIndices[0].eventDate.getStartPosition() - 5, 1970.00) : 0)
+    setTimelineEnd(eventsWithIndices.length > 0 ? Math.max(eventsWithIndices[eventsWithIndices.length - 1].eventDate.getEndPosition() + 5, new Date().getFullYear()) : 0)
+  }, [eventsWithIndices]);
 
   // Handle trackpad pinch and Ctrl+scroll zoom
   useEffect(() => {
@@ -161,47 +153,51 @@ function Timeline() {
     return marks;
   }, [timelineStart, timelineEnd, increment, totalRange]);
 
-  // zoom factor - number of years to remove from the view range on each zoom in
-  const zoomIn = (zoomFactor = 10) => {
-    const currentRange = end - start;
-    if (currentRange > 20) { // Prevents over-zooming
-      const container = timelineContainerRef.current;
-      const containerWidth = container.clientWidth;
-      const scrollCenter = container.scrollLeft + containerWidth / 2;
-      const totalWidth = container.scrollWidth;
-      
-      // Calculate which year is at the center of the viewport
-      const centerRatio = scrollCenter / totalWidth;
-      const centerYear = timelineStart + (timelineEnd - timelineStart) * centerRatio;
-      
-      const newRange = currentRange - zoomFactor;
-      const newStart = centerYear - newRange / 2;
-      const newEnd = centerYear + newRange / 2;
-      
-      setStart(newStart);
-      setEnd(newEnd);
-      
-      // After state updates, reposition scroll to keep centerYear in the center
-      setTimeout(() => {
-        const newTotalWidth = container.scrollWidth;
-        const newCenterRatio = (centerYear - timelineStart) / (timelineEnd - timelineStart);
-        const newScrollCenter = newTotalWidth * newCenterRatio;
-        container.scrollLeft = newScrollCenter - containerWidth / 2;
-      }, 0);
-    }
-  };
-
-  // zoomFactor - number of years to add to the view range on each zoom out
-  const zoomOut = (zoomFactor = 10) => {
+  const getCenterYear = () => {
     const container = timelineContainerRef.current;
     const containerWidth = container.clientWidth;
     const scrollCenter = container.scrollLeft + containerWidth / 2;
     const totalWidth = container.scrollWidth;
     
     // Calculate which year is at the center of the viewport
-    const centerRatio = scrollCenter / totalWidth;
-    const centerYear = timelineStart + (timelineEnd - timelineStart) * centerRatio;
-    
+    const centerScrollPercentage = scrollCenter / totalWidth;
+    const centerYear = timelineStart + (timelineEnd - timelineStart) * centerScrollPercentage;
+    return centerYear;
+  }
+
+  const scrollToRange = (centerYear) => {
+    const container = timelineContainerRef.current;
+    const containerWidth = container.clientWidth;
+
+    const newTotalWidth = container.scrollWidth;
+    const newCenterRatio = (centerYear - timelineStart) / (timelineEnd - timelineStart);
+    const newScrollCenter = newTotalWidth * newCenterRatio;
+    container.scrollLeft = newScrollCenter - containerWidth / 2;
+  };
+
+  useEffect(() => {
+    if (timelineContainerRef.current) {
+      scrollToRange(start + (end - start) / 2);
+    }
+  }, [start, end, timelineContainerRef.current]);
+
+  // zoom factor - number of years to remove from the view range on each zoom in
+  const zoomIn = (zoomFactor = 10) => {
+    const currentRange = end - start;
+    if (currentRange > 20) { // Prevents over-zooming
+      const centerYear = getCenterYear();
+      const newRange = currentRange - zoomFactor;
+      const newStart = centerYear - newRange / 2;
+      const newEnd = centerYear + newRange / 2;
+      
+      setStart(newStart);
+      setEnd(newEnd);
+    }
+  };
+
+  // zoomFactor - number of years to add to the view range on each zoom out
+  const zoomOut = (zoomFactor = 10) => {
+    const centerYear = getCenterYear();
     const currentRange = end - start;
     const newRange = currentRange + zoomFactor;
     // Constrain to timeline bounds
@@ -210,14 +206,6 @@ function Timeline() {
     
     setStart(newStart);
     setEnd(newEnd);
-    
-    // After state updates, reposition scroll to keep centerYear in the center
-    setTimeout(() => {
-      const newTotalWidth = container.scrollWidth;
-      const newCenterRatio = (centerYear - timelineStart) / (timelineEnd - timelineStart);
-      const newScrollCenter = newTotalWidth * newCenterRatio;
-      container.scrollLeft = newScrollCenter - containerWidth / 2;
-    }, 0);
   };
 
   const createEvent = () => {
